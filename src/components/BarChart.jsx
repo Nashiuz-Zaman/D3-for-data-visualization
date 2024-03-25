@@ -6,7 +6,6 @@ import PropTypes from "prop-types";
 const BarChart = ({ data }) => {
   const barchartSvgRef = useRef(null);
 
-
   useEffect(() => {
     if (barchartSvgRef?.current !== null) {
       const svgEl = barchartSvgRef.current;
@@ -47,27 +46,36 @@ const BarChart = ({ data }) => {
       const yAxisGroup = graph.append("g");
 
       const xAxis = d3.axisBottom(x);
-      const yAxis = d3.axisLeft(y);
+      const yAxis = d3.axisLeft(y).ticks(4);
 
       xAxisGroup.call(xAxis);
       yAxisGroup.call(yAxis);
 
       // make rectangles
       const rects = graph.selectAll("rect").data(data);
+
       rects
         .enter()
         .append("rect")
         .attr("width", x.bandwidth)
-        .attr("height", d => graphHeight - y(d.number))
+        .attr("height", 0)
+        .attr("y", graphHeight)
         .attr("x", d => x(d.name))
+        .attr("fill", d => d.color)
+        .transition()
+        .duration(200)
         .attr("y", d => y(d.number))
-        .attr("fill", d => d.color);
+        .attr("height", d => graphHeight - y(d.number));
     }
   }, [data]);
 
   return (
     <svg width={600} height={500} ref={barchartSvgRef}>
-      <g></g>
+      <g>
+        {data?.map(d => (
+          <rect key={d.color}></rect>
+        ))}
+      </g>
     </svg>
   );
 };
